@@ -21,8 +21,6 @@ import java.util.Iterator;
 import java.util.ServiceLoader;
 import java.util.function.Supplier;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.SWTException;
 import org.eclipse.swt.widgets.Composite;
 
 import de.carne.swt.browseradapter.spi.BrowserAdapterProvider;
@@ -60,7 +58,8 @@ public abstract class BrowserAdapter implements BrowserInstance, Supplier<Compos
 	 * @param style the style to use.
 	 * @param providerNames the provider names to consider in order of preference (highest preference first).
 	 * @return the created {@linkplain BrowserAdapter} instance.
-	 * @throws SWTException if no matching provider is found or instance creation failed.
+	 * @throws IllegalArgumentException if no matching provider is found.
+	 * @see BrowserAdapterProvider#getInstance(Composite, int)
 	 */
 	public static BrowserAdapter getInstance(Composite parent, int style, String... providerNames) {
 		BrowserAdapterProvider matchingProvider = null;
@@ -79,8 +78,7 @@ public abstract class BrowserAdapter implements BrowserInstance, Supplier<Compos
 			}
 		}
 		if (matchingProvider == null) {
-			throw new SWTException(SWT.ERROR_INVALID_ARGUMENT,
-					"No matching provider found for: " + Arrays.toString(providerNames));
+			throw new IllegalArgumentException("No matching provider found for: " + Arrays.toString(providerNames));
 		}
 		return matchingProvider.getInstance(parent, style);
 	}

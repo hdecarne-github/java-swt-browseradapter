@@ -21,6 +21,20 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.AuthenticationEvent;
+import org.eclipse.swt.browser.AuthenticationListener;
+import org.eclipse.swt.browser.CloseWindowListener;
+import org.eclipse.swt.browser.LocationEvent;
+import org.eclipse.swt.browser.LocationListener;
+import org.eclipse.swt.browser.OpenWindowListener;
+import org.eclipse.swt.browser.ProgressEvent;
+import org.eclipse.swt.browser.ProgressListener;
+import org.eclipse.swt.browser.StatusTextEvent;
+import org.eclipse.swt.browser.StatusTextListener;
+import org.eclipse.swt.browser.TitleEvent;
+import org.eclipse.swt.browser.TitleListener;
+import org.eclipse.swt.browser.VisibilityWindowListener;
+import org.eclipse.swt.browser.WindowEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -34,11 +48,22 @@ class BrowserTestApplication implements MainFunction {
 
 	private final Late<BrowserAdapter> browserHolder = new Late<>();
 
-	private static final String TEST_TEXT1 = "<html><body>Test1</body></html>";
-	private static final String TEST_TEXT2 = "<html><body>Test2</body></html>";
 	private static final String TEST_URL = "https://www.google.com";
 	private static final String TEST_COOKIE = "test=true;path=/";
 	private static final String TEST_COOKIE_NAME = "test";
+	private static final String LISTENER_LOG = "";
+
+	private final AuthenticationListener authenticationListener = this::onAuthenticate;
+	private final CloseWindowListener closeWindowListener = this::onWindowClose;
+	private final OpenWindowListener openWindowListener = this::onWindowOpen;
+	private final VisibilityWindowListener visibilityWindowListener = VisibilityWindowListener
+			.showAdapter(this::onWindowShow);
+	private final LocationListener locationListener = LocationListener.changedAdapter(this::onLocationChanged);
+	private final ProgressListener progressListener = ProgressListener.changedAdapter(this::onProgressChanged);
+	private final StatusTextListener statusTextListener = this::onStatusTextChanged;
+	private final TitleListener titleListener = this::onTitleChanged;
+
+	private final StringBuilder listenerLogBuffer = new StringBuilder();
 
 	@Override
 	public void main(String[] args) {
@@ -46,14 +71,15 @@ class BrowserTestApplication implements MainFunction {
 		Shell shell = new Shell(display);
 
 		this.browserHolder.set(BrowserAdapter.getInstance(shell, SWT.NONE, args));
+
+		addBrowserListener();
+
 		shell.setLayout(new FillLayout());
 		shell.open();
 
 		assertBrowserProvider(args);
 		assertBrowserType();
 		assertBrowserWidget(shell);
-		assertBrowserText();
-		assertBrowserUrl();
 		assertBrowserNavigation();
 		assertBrowserCookies();
 		assertBrowserJavascript();
@@ -62,7 +88,68 @@ class BrowserTestApplication implements MainFunction {
 				display.sleep();
 			}
 		}
+		removeBrowserListener();
 		display.dispose();
+
+		Assertions.assertEquals(LISTENER_LOG, this.listenerLogBuffer.toString());
+	}
+
+	private void addBrowserListener() {
+		BrowserAdapter browser = this.browserHolder.get();
+
+		browser.addAuthenticationListener(this.authenticationListener);
+		browser.addCloseWindowListener(this.closeWindowListener);
+		browser.addOpenWindowListener(this.openWindowListener);
+		browser.addVisibilityWindowListener(this.visibilityWindowListener);
+		browser.addLocationListener(this.locationListener);
+		browser.addProgressListener(this.progressListener);
+		browser.addStatusTextListener(this.statusTextListener);
+		browser.addTitleListener(this.titleListener);
+	}
+
+	private void removeBrowserListener() {
+		BrowserAdapter browser = this.browserHolder.get();
+
+		browser.removeAuthenticationListener(this.authenticationListener);
+		browser.removeCloseWindowListener(this.closeWindowListener);
+		browser.removeOpenWindowListener(this.openWindowListener);
+		browser.removeVisibilityWindowListener(this.visibilityWindowListener);
+		browser.removeLocationListener(this.locationListener);
+		browser.removeProgressListener(this.progressListener);
+		browser.removeStatusTextListener(this.statusTextListener);
+		browser.removeTitleListener(this.titleListener);
+	}
+
+	private void onAuthenticate(AuthenticationEvent event) {
+		this.listenerLogBuffer.append("onAuthenticate;");
+	}
+
+	private void onWindowClose(WindowEvent event) {
+		this.listenerLogBuffer.append("onWindowClose;");
+	}
+
+	private void onWindowOpen(WindowEvent event) {
+		this.listenerLogBuffer.append("onWindowOpen;");
+	}
+
+	private void onWindowShow(WindowEvent event) {
+		this.listenerLogBuffer.append("onWindowShow;");
+	}
+
+	private void onLocationChanged(LocationEvent event) {
+		this.listenerLogBuffer.append("onLocationChanged;");
+	}
+
+	private void onProgressChanged(ProgressEvent event) {
+		this.listenerLogBuffer.append("onProgressChanged;");
+	}
+
+	private void onStatusTextChanged(StatusTextEvent event) {
+		this.listenerLogBuffer.append("onStatusTextChanged;");
+	}
+
+	private void onTitleChanged(TitleEvent event) {
+		this.listenerLogBuffer.append("onTitleChanged;");
 	}
 
 	private void assertBrowserProvider(String[] args) {
@@ -81,30 +168,6 @@ class BrowserTestApplication implements MainFunction {
 		String actualType = this.browserHolder.get().getBrowserType();
 
 		Assertions.assertTrue(expectedTypes.contains(actualType), "Unepexted browser type: " + actualType);
-	}
-
-	private void assertBrowserText() {
-		BrowserAdapter browser = this.browserHolder.get();
-
-		browser.setText(TEST_TEXT1);
-
-		Assertions.assertEquals(TEST_TEXT1, browser.getText());
-
-		browser.setText(TEST_TEXT2, true);
-
-		Assertions.assertEquals(TEST_TEXT2, browser.getText());
-	}
-
-	private void assertBrowserUrl() {
-		BrowserAdapter browser = this.browserHolder.get();
-
-		browser.setUrl(TEST_URL);
-
-		Assertions.assertEquals(TEST_URL, browser.getUrl());
-
-		browser.setUrl(TEST_URL, "", new String[] {});
-
-		Assertions.assertEquals(TEST_URL, browser.getUrl());
 	}
 
 	private void assertBrowserNavigation() {
