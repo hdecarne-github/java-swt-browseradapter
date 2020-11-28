@@ -1,0 +1,3 @@
+de.carne.swt.browseradapter.ChromiumBrowserAdapterProvider
+de.carne.swt.browseradapter.PlatformBrowserAdapterProvider
+de.carne.swt.browseradapter.WebKitBrowserAdapterProvider
