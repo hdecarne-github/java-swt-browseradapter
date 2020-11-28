@@ -17,7 +17,6 @@
 package de.carne.swt.browseradapter.test;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.SWTException;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.jupiter.api.Assertions;
@@ -37,7 +36,7 @@ class BrowserAdapterTest {
 		Display display = new Display();
 		Shell shell = new Shell(display);
 
-		Assertions.assertThrows(SWTException.class, () -> {
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			BrowserAdapter.getInstance(shell, SWT.NONE, "unknown");
 		});
 		shell.close();
