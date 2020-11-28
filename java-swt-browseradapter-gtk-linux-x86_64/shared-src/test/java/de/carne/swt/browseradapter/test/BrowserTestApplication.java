@@ -51,6 +51,7 @@ class BrowserTestApplication implements MainFunction {
 	private static final String TEST_URL = "https://www.google.com";
 	private static final String TEST_COOKIE = "test=true;path=/";
 	private static final String TEST_COOKIE_NAME = "test";
+	private static final String TEST_COOKIE_VALUE = "true";
 	private static final String LISTENER_LOG = "";
 
 	private final AuthenticationListener authenticationListener = this::onAuthenticate;
@@ -184,7 +185,7 @@ class BrowserTestApplication implements MainFunction {
 
 		browser.setCookie(TEST_COOKIE, TEST_URL);
 
-		Assertions.assertEquals(TEST_COOKIE, browser.getCookie(TEST_COOKIE_NAME, TEST_URL));
+		Assertions.assertEquals(TEST_COOKIE_VALUE, browser.getCookie(TEST_COOKIE_NAME, TEST_URL));
 	}
 
 	private void assertBrowserJavascript() {
