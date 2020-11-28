@@ -34,19 +34,29 @@ class BrowserTestApplication implements MainFunction {
 
 	private final Late<BrowserAdapter> browserHolder = new Late<>();
 
+	private static final String TEST_TEXT1 = "<html><body>Test1</body></html>";
+	private static final String TEST_TEXT2 = "<html><body>Test2</body></html>";
+	private static final String TEST_URL = "https://www.google.com";
+	private static final String TEST_COOKIE = "test=true;path=/";
+	private static final String TEST_COOKIE_NAME = "test";
+
 	@Override
 	public void main(String[] args) {
 		Display display = new Display();
 		Shell shell = new Shell(display);
-		BrowserAdapter browser = this.browserHolder.set(BrowserAdapter.getInstance(shell, SWT.NONE, args));
+
+		this.browserHolder.set(BrowserAdapter.getInstance(shell, SWT.NONE, args));
+		shell.setLayout(new FillLayout());
+		shell.open();
 
 		assertBrowserProvider(args);
 		assertBrowserType();
 		assertBrowserWidget(shell);
-
-		shell.setLayout(new FillLayout());
-		shell.open();
-		browser.setUrl("https://www.google.com");
+		assertBrowserText();
+		assertBrowserUrl();
+		assertBrowserNavigation();
+		assertBrowserCookies();
+		assertBrowserJavascript();
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch()) {
 				display.sleep();
@@ -71,6 +81,61 @@ class BrowserTestApplication implements MainFunction {
 		String actualType = this.browserHolder.get().getBrowserType();
 
 		Assertions.assertTrue(expectedTypes.contains(actualType), "Unepexted browser type: " + actualType);
+	}
+
+	private void assertBrowserText() {
+		BrowserAdapter browser = this.browserHolder.get();
+
+		browser.setText(TEST_TEXT1);
+
+		Assertions.assertEquals(TEST_TEXT1, browser.getText());
+
+		browser.setText(TEST_TEXT2, true);
+
+		Assertions.assertEquals(TEST_TEXT2, browser.getText());
+	}
+
+	private void assertBrowserUrl() {
+		BrowserAdapter browser = this.browserHolder.get();
+
+		browser.setUrl(TEST_URL);
+
+		Assertions.assertEquals(TEST_URL, browser.getUrl());
+
+		browser.setUrl(TEST_URL, "", new String[] {});
+
+		Assertions.assertEquals(TEST_URL, browser.getUrl());
+	}
+
+	private void assertBrowserNavigation() {
+		BrowserAdapter browser = this.browserHolder.get();
+
+		Assertions.assertFalse(browser.isBackEnabled());
+		Assertions.assertFalse(browser.back());
+		Assertions.assertFalse(browser.isForwardEnabled());
+		Assertions.assertFalse(browser.forward());
+	}
+
+	private void assertBrowserCookies() {
+		BrowserAdapter browser = this.browserHolder.get();
+
+		browser.setCookie(TEST_COOKIE, TEST_URL);
+
+		Assertions.assertEquals(TEST_COOKIE, browser.getCookie(TEST_COOKIE_NAME, TEST_URL));
+	}
+
+	private void assertBrowserJavascript() {
+		BrowserAdapter browser = this.browserHolder.get();
+
+		Assertions.assertTrue(browser.getJavascriptEnabled());
+
+		browser.setJavascriptEnabled(false);
+
+		Assertions.assertFalse(browser.getJavascriptEnabled());
+
+		browser.setJavascriptEnabled(true);
+
+		Assertions.assertTrue(browser.getJavascriptEnabled());
 	}
 
 }
