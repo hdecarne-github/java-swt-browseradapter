@@ -40,7 +40,9 @@ class BrowserTestApplication implements MainFunction {
 		Shell shell = new Shell(display);
 		BrowserAdapter browser = this.browserHolder.set(BrowserAdapter.getInstance(shell, SWT.NONE, args));
 
+		assertBrowserProvider(args);
 		assertBrowserType();
+		assertBrowserWidget(shell);
 
 		shell.setLayout(new FillLayout());
 		shell.open();
@@ -53,12 +55,22 @@ class BrowserTestApplication implements MainFunction {
 		display.dispose();
 	}
 
-	private void assertBrowserType() {
-		Set<String> expectedBrowserTypes = new HashSet<>(Arrays.asList("webkit", "ie"));
-		String actualBrowserType = this.browserHolder.get().getBrowserType();
+	private void assertBrowserProvider(String[] args) {
+		@SuppressWarnings("null") Set<String> expectedProviders = new HashSet<>(Arrays.asList(args));
+		String actualProvider = this.browserHolder.get().provider().name();
 
-		Assertions.assertTrue(expectedBrowserTypes.contains(actualBrowserType),
-				"Unepexted browser type: " + actualBrowserType);
+		Assertions.assertTrue(expectedProviders.contains(actualProvider), "Unepexted browser type: " + actualProvider);
+	}
+
+	private void assertBrowserWidget(Shell shell) {
+		Assertions.assertEquals(shell, this.browserHolder.get().getBrowserWidget().getParent());
+	}
+
+	private void assertBrowserType() {
+		Set<String> expectedTypes = new HashSet<>(Arrays.asList("webkit", "ie"));
+		String actualType = this.browserHolder.get().getBrowserType();
+
+		Assertions.assertTrue(expectedTypes.contains(actualType), "Unepexted browser type: " + actualType);
 	}
 
 }
