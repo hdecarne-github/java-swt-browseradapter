@@ -89,7 +89,6 @@ class BrowserTestApplication implements MainFunction {
 				display.sleep();
 			}
 		}
-		removeBrowserListener();
 		display.dispose();
 
 		Assertions.assertEquals(LISTENER_LOG, this.listenerLogBuffer.toString());
@@ -127,6 +126,7 @@ class BrowserTestApplication implements MainFunction {
 
 	private void onWindowClose(WindowEvent event) {
 		this.listenerLogBuffer.append("onWindowClose;");
+		removeBrowserListener();
 	}
 
 	private void onWindowOpen(WindowEvent event) {
