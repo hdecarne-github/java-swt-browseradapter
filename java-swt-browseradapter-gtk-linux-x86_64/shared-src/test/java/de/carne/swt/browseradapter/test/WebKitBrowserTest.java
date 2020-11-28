@@ -16,35 +16,21 @@
  */
 package de.carne.swt.browseradapter.test;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import de.carne.swt.browseradapter.ChromiumBrowserAdapterProvider;
 import de.carne.swt.browseradapter.PlatformBrowserAdapterProvider;
+import de.carne.swt.browseradapter.WebKitBrowserAdapterProvider;
 import de.carne.test.swt.DisableIfThreadNotSWTCapable;
-import de.carne.test.swt.tester.SWTTest;
 
 /**
- * Test {@linkplain PlatformBrowserAdapterProvider} class.
+ * Test {@linkplain WebKitBrowserAdapterProvider} class.
  */
 @DisableIfThreadNotSWTCapable
-class WebKitBrowserTest extends SWTTest {
+class WebKitBrowserTest extends BrowserTest {
 
 	@Test
-	void testPlatformBrowser() {
-		Script script = script(BrowserTestApplication::main);
-
-		script.add(this::doCloseRoot);
-		script.args(ChromiumBrowserAdapterProvider.NAME, PlatformBrowserAdapterProvider.NAME);
-		script.execute();
-
-		Assertions.assertTrue(script.passed());
-	}
-
-	private void doCloseRoot() {
-		traceAction();
-
-		accessShell().close();
+	void testWebKitBrowser() {
+		testBrowser(WebKitBrowserAdapterProvider.NAME, PlatformBrowserAdapterProvider.NAME);
 	}
 
 }

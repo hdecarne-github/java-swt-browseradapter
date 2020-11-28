@@ -84,7 +84,15 @@ public abstract class PlatformHelper {
 	 * @return {@code true} if the Chromium browser backend is available.
 	 */
 	protected boolean internalIsChromiumAvailable() {
-		return false;
+		boolean isAvailable = false;
+
+		try {
+			Class.forName("org.eclipse.swt.browser.ChromiumImpl");
+			isAvailable = true;
+		} catch (Exception e) {
+			Exceptions.ignore(e);
+		}
+		return isAvailable;
 	}
 
 }

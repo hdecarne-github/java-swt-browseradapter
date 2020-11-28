@@ -16,19 +16,31 @@
  */
 package de.carne.swt.browseradapter.test;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.junit.jupiter.api.Assertions;
 
 import de.carne.swt.browseradapter.BrowserAdapter;
+import de.carne.test.swt.tester.MainFunction;
+import de.carne.util.Late;
 
-class BrowserTestApplication {
+class BrowserTestApplication implements MainFunction {
 
-	static void main(String[] args) {
+	private final Late<BrowserAdapter> browserHolder = new Late<>();
+
+	@Override
+	public void main(String[] args) {
 		Display display = new Display();
 		Shell shell = new Shell(display);
-		BrowserAdapter browser = BrowserAdapter.getInstance(shell, SWT.NONE, args);
+		BrowserAdapter browser = this.browserHolder.set(BrowserAdapter.getInstance(shell, SWT.NONE, args));
+
+		assertBrowserType();
 
 		shell.setLayout(new FillLayout());
 		shell.open();
@@ -39,6 +51,14 @@ class BrowserTestApplication {
 			}
 		}
 		display.dispose();
+	}
+
+	private void assertBrowserType() {
+		Set<String> expectedBrowserTypes = new HashSet<>(Arrays.asList("webkit", "ie"));
+		String actualBrowserType = this.browserHolder.get().getBrowserType();
+
+		Assertions.assertTrue(expectedBrowserTypes.contains(actualBrowserType),
+				"Unepexted browser type: " + actualBrowserType);
 	}
 
 }

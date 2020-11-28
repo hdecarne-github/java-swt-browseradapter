@@ -28,9 +28,4 @@ public class CocoaPlatformHelper extends PlatformHelper {
 		return true;
 	}
 
-	@Override
-	protected boolean internalIsChromiumAvailable() {
-		return super.internalIsChromiumAvailable();
-	}
-
 }

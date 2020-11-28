@@ -16,34 +16,20 @@
  */
 package de.carne.swt.browseradapter.test;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import de.carne.swt.browseradapter.PlatformBrowserAdapterProvider;
 import de.carne.test.swt.DisableIfThreadNotSWTCapable;
-import de.carne.test.swt.tester.SWTTest;
 
 /**
  * Test {@linkplain PlatformBrowserAdapterProvider} class.
  */
 @DisableIfThreadNotSWTCapable
-class PlatformBrowserTest extends SWTTest {
+class PlatformBrowserTest extends BrowserTest {
 
 	@Test
 	void testPlatformBrowser() {
-		Script script = script(BrowserTestApplication::main);
-
-		script.add(this::doCloseRoot);
-		script.args(PlatformBrowserAdapterProvider.NAME);
-		script.execute();
-
-		Assertions.assertTrue(script.passed());
-	}
-
-	private void doCloseRoot() {
-		traceAction();
-
-		accessShell().close();
+		testBrowser(PlatformBrowserAdapterProvider.NAME);
 	}
 
 }
