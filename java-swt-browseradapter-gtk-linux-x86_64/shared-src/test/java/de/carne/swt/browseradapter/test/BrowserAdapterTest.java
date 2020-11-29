@@ -32,7 +32,7 @@ import de.carne.test.swt.DisableIfThreadNotSWTCapable;
 class BrowserAdapterTest {
 
 	@Test
-	void testUnknownProvder() {
+	void testUnknownProvider() {
 		Display display = new Display();
 		Shell shell = new Shell(display);
 

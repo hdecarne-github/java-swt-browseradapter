@@ -46,6 +46,10 @@ import de.carne.util.Late;
 
 class BrowserTestApplication implements MainFunction {
 
+	static final String TITLE_RUNNING = "Running...";
+	static final String TITLE_COMPLETED = "Completed";
+
+	private final Late<Shell> shellHolder = new Late<>();
 	private final Late<BrowserAdapter> browserHolder = new Late<>();
 
 	private static final String TEST_URL = "https://www.google.com";
@@ -58,7 +62,7 @@ class BrowserTestApplication implements MainFunction {
 	private final CloseWindowListener closeWindowListener = this::onWindowClose;
 	private final OpenWindowListener openWindowListener = this::onWindowOpen;
 	private final VisibilityWindowListener visibilityWindowListener = VisibilityWindowListener
-			.showAdapter(this::onWindowShow);
+			.hideAdapter(this::onWindowHide);
 	private final LocationListener locationListener = LocationListener.changedAdapter(this::onLocationChanged);
 	private final ProgressListener progressListener = ProgressListener.changedAdapter(this::onProgressChanged);
 	private final StatusTextListener statusTextListener = this::onStatusTextChanged;
@@ -69,12 +73,12 @@ class BrowserTestApplication implements MainFunction {
 	@Override
 	public void main(String[] args) {
 		Display display = new Display();
-		Shell shell = new Shell(display);
+		Shell shell = this.shellHolder.set(new Shell(display));
+		BrowserAdapter browser = this.browserHolder.set(BrowserAdapter.getInstance(shell, SWT.NONE, args));
 
-		this.browserHolder.set(BrowserAdapter.getInstance(shell, SWT.NONE, args));
+		addBrowserListeners();
 
-		addBrowserListener();
-
+		shell.setText(TITLE_RUNNING);
 		shell.setLayout(new FillLayout());
 		shell.open();
 
@@ -84,6 +88,7 @@ class BrowserTestApplication implements MainFunction {
 		assertBrowserNavigation();
 		assertBrowserCookies();
 		assertBrowserJavascript();
+		browser.setUrl(TEST_URL);
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch()) {
 				display.sleep();
@@ -94,7 +99,7 @@ class BrowserTestApplication implements MainFunction {
 		Assertions.assertEquals(LISTENER_LOG, this.listenerLogBuffer.toString());
 	}
 
-	private void addBrowserListener() {
+	private void addBrowserListeners() {
 		BrowserAdapter browser = this.browserHolder.get();
 
 		browser.addAuthenticationListener(this.authenticationListener);
@@ -107,7 +112,7 @@ class BrowserTestApplication implements MainFunction {
 		browser.addTitleListener(this.titleListener);
 	}
 
-	private void removeBrowserListener() {
+	private void removeBrowserListeners() {
 		BrowserAdapter browser = this.browserHolder.get();
 
 		browser.removeAuthenticationListener(this.authenticationListener);
@@ -126,15 +131,15 @@ class BrowserTestApplication implements MainFunction {
 
 	private void onWindowClose(WindowEvent event) {
 		this.listenerLogBuffer.append("onWindowClose;");
-		removeBrowserListener();
+		removeBrowserListeners();
 	}
 
 	private void onWindowOpen(WindowEvent event) {
 		this.listenerLogBuffer.append("onWindowOpen;");
 	}
 
-	private void onWindowShow(WindowEvent event) {
-		this.listenerLogBuffer.append("onWindowShow;");
+	private void onWindowHide(WindowEvent event) {
+		this.listenerLogBuffer.append("onWindowHide;");
 	}
 
 	private void onLocationChanged(LocationEvent event) {
@@ -143,6 +148,9 @@ class BrowserTestApplication implements MainFunction {
 
 	private void onProgressChanged(ProgressEvent event) {
 		this.listenerLogBuffer.append("onProgressChanged;");
+		if (event.current >= event.total) {
+			this.shellHolder.get().setText(TITLE_COMPLETED);
+		}
 	}
 
 	private void onStatusTextChanged(StatusTextEvent event) {

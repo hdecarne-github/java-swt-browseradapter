@@ -19,6 +19,7 @@ package de.carne.swt.browseradapter.test;
 import org.junit.jupiter.api.Assertions;
 
 import de.carne.test.swt.tester.SWTTest;
+import de.carne.test.swt.tester.accessor.ShellAccessor;
 
 /**
  * Abstract base class for all kinds of browser tests.
@@ -28,17 +29,23 @@ abstract class BrowserTest extends SWTTest {
 	protected void testBrowser(String... args) {
 		Script script = script(new BrowserTestApplication());
 
-		script.add(this::doCloseRoot);
+		script.add(this::doWaitShellClosable, this::doCloseShell);
 		script.args(args);
 		script.execute();
 
 		Assertions.assertTrue(script.passed());
 	}
 
-	private void doCloseRoot() {
+	private ShellAccessor doWaitShellClosable() {
 		traceAction();
 
-		accessShell().close();
+		return accessShell(BrowserTestApplication.TITLE_COMPLETED);
+	}
+
+	private void doCloseShell(ShellAccessor shell) {
+		traceAction();
+
+		shell.close();
 	}
 
 }
