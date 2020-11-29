@@ -23,9 +23,6 @@ import de.carne.swt.browseradapter.platform.PlatformHelper;
  */
 public class GtkPlatformHelper extends PlatformHelper {
 
-	@Override
-	protected boolean internalIsWebKitAvailable() {
-		return true;
-	}
+	// Nothing to do here
 
 }

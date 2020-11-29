@@ -66,7 +66,7 @@ public abstract class PlatformHelper {
 	 * @return {@code true} if the WebKit browser backend is available.
 	 */
 	protected boolean internalIsWebKitAvailable() {
-		return false;
+		return true;
 	}
 
 	/**

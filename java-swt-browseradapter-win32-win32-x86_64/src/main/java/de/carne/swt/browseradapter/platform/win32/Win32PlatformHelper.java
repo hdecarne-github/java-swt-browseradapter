@@ -25,7 +25,7 @@ public class Win32PlatformHelper extends PlatformHelper {
 
 	@Override
 	protected boolean internalIsWebKitAvailable() {
-		return true;
+		return false;
 	}
 
 }

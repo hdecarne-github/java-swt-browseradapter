@@ -23,9 +23,6 @@ import de.carne.swt.browseradapter.platform.PlatformHelper;
  */
 public class CocoaPlatformHelper extends PlatformHelper {
 
-	@Override
-	protected boolean internalIsWebKitAvailable() {
-		return true;
-	}
+	// Nothing to do here
 
 }

@@ -46,7 +46,8 @@ import de.carne.util.Late;
 
 class BrowserTestApplication implements MainFunction {
 
-	static final String TITLE_RUNNING = "Running...";
+	static final String TITLE_LOADING = "Loading...";
+	static final String TITLE_REFRESHING = "Refreshing...";
 	static final String TITLE_COMPLETED = "Completed";
 
 	private final Late<Shell> shellHolder = new Late<>();
@@ -78,16 +79,17 @@ class BrowserTestApplication implements MainFunction {
 
 		addBrowserListeners();
 
-		shell.setText(TITLE_RUNNING);
 		shell.setLayout(new FillLayout());
 		shell.open();
 
-		assertBrowserProvider(args);
-		assertBrowserType();
-		assertBrowserWidget(shell);
-		assertBrowserNavigation();
-		assertBrowserCookies();
-		assertBrowserJavascript();
+		checkBrowserProvider(args);
+		checkBrowserType();
+		checkBrowserWidget(shell);
+		checkBrowserNavigation();
+		checkBrowserCookies();
+		checkBrowserJavascript();
+
+		shell.setText(TITLE_LOADING);
 		browser.setUrl(TEST_URL);
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch()) {
@@ -125,60 +127,68 @@ class BrowserTestApplication implements MainFunction {
 		browser.removeTitleListener(this.titleListener);
 	}
 
-	private void onAuthenticate(AuthenticationEvent event) {
+	private void onAuthenticate(@SuppressWarnings("unused") AuthenticationEvent event) {
 		this.listenerLogBuffer.append("onAuthenticate;");
 	}
 
-	private void onWindowClose(WindowEvent event) {
+	private void onWindowClose(@SuppressWarnings("unused") WindowEvent event) {
 		this.listenerLogBuffer.append("onWindowClose;");
 	}
 
-	private void onWindowOpen(WindowEvent event) {
+	private void onWindowOpen(@SuppressWarnings("unused") WindowEvent event) {
 		this.listenerLogBuffer.append("onWindowOpen;");
 	}
 
-	private void onWindowHide(WindowEvent event) {
+	private void onWindowHide(@SuppressWarnings("unused") WindowEvent event) {
 		this.listenerLogBuffer.append("onWindowHide;");
 	}
 
-	private void onLocationChanged(LocationEvent event) {
+	private void onLocationChanged(@SuppressWarnings("unused") LocationEvent event) {
 		this.listenerLogBuffer.append("onLocationChanged;");
 	}
 
 	private void onProgressChanged(ProgressEvent event) {
 		if (event.current >= event.total) {
-			this.shellHolder.get().setText(TITLE_COMPLETED);
-			removeBrowserListeners();
+			Shell shell = this.shellHolder.get();
+			String shellText = shell.getText();
+
+			if (TITLE_LOADING.equals(shellText)) {
+				shell.setText(TITLE_REFRESHING);
+				checkBrowserRefresh();
+			} else if (TITLE_REFRESHING.equals(shellText)) {
+				shell.setText(TITLE_COMPLETED);
+				removeBrowserListeners();
+			}
 		}
 	}
 
-	private void onStatusTextChanged(StatusTextEvent event) {
+	private void onStatusTextChanged(@SuppressWarnings("unused") StatusTextEvent event) {
 		this.listenerLogBuffer.append("onStatusTextChanged;");
 	}
 
-	private void onTitleChanged(TitleEvent event) {
+	private void onTitleChanged(@SuppressWarnings("unused") TitleEvent event) {
 		this.listenerLogBuffer.append("onTitleChanged;");
 	}
 
-	private void assertBrowserProvider(String[] args) {
+	private void checkBrowserProvider(String[] args) {
 		@SuppressWarnings("null") Set<String> expectedProviders = new HashSet<>(Arrays.asList(args));
 		String actualProvider = this.browserHolder.get().provider().name();
 
 		Assertions.assertTrue(expectedProviders.contains(actualProvider), "Unepexted browser type: " + actualProvider);
 	}
 
-	private void assertBrowserWidget(Shell shell) {
+	private void checkBrowserWidget(Shell shell) {
 		Assertions.assertEquals(shell, this.browserHolder.get().getBrowserWidget().getParent());
 	}
 
-	private void assertBrowserType() {
+	private void checkBrowserType() {
 		Set<String> expectedTypes = new HashSet<>(Arrays.asList("webkit", "ie"));
 		String actualType = this.browserHolder.get().getBrowserType();
 
 		Assertions.assertTrue(expectedTypes.contains(actualType), "Unepexted browser type: " + actualType);
 	}
 
-	private void assertBrowserNavigation() {
+	private void checkBrowserNavigation() {
 		BrowserAdapter browser = this.browserHolder.get();
 
 		Assertions.assertFalse(browser.isBackEnabled());
@@ -187,7 +197,7 @@ class BrowserTestApplication implements MainFunction {
 		Assertions.assertFalse(browser.forward());
 	}
 
-	private void assertBrowserCookies() {
+	private void checkBrowserCookies() {
 		BrowserAdapter browser = this.browserHolder.get();
 
 		browser.setCookie(TEST_COOKIE, TEST_URL);
@@ -195,7 +205,7 @@ class BrowserTestApplication implements MainFunction {
 		Assertions.assertEquals(TEST_COOKIE_VALUE, browser.getCookie(TEST_COOKIE_NAME, TEST_URL));
 	}
 
-	private void assertBrowserJavascript() {
+	private void checkBrowserJavascript() {
 		BrowserAdapter browser = this.browserHolder.get();
 
 		Assertions.assertTrue(browser.getJavascriptEnabled());
@@ -207,6 +217,13 @@ class BrowserTestApplication implements MainFunction {
 		browser.setJavascriptEnabled(true);
 
 		Assertions.assertTrue(browser.getJavascriptEnabled());
+	}
+
+	private void checkBrowserRefresh() {
+		BrowserAdapter browser = this.browserHolder.get();
+
+		browser.stop();
+		browser.refresh();
 	}
 
 }
