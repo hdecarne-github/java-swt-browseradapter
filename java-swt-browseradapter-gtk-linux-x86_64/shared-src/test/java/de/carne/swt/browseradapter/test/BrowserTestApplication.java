@@ -57,7 +57,7 @@ class BrowserTestApplication implements MainFunction {
 	private static final String TEST_COOKIE = "test=true;path=/";
 	private static final String TEST_COOKIE_NAME = "test";
 	private static final String TEST_COOKIE_VALUE = "true";
-	private static final String LISTENER_LOG = "onLocationChanged;onTitleChanged;";
+	private static final String LISTENER_LOG = "onLocationChanged;onTitleChanged;onTitleChanged;onLocationChanged;onTitleChanged;";
 
 	private final AuthenticationListener authenticationListener = this::onAuthenticate;
 	private final CloseWindowListener closeWindowListener = this::onWindowClose;
