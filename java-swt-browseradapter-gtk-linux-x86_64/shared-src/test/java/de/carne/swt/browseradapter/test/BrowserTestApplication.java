@@ -56,7 +56,7 @@ class BrowserTestApplication implements MainFunction {
 	private static final String TEST_COOKIE = "test=true;path=/";
 	private static final String TEST_COOKIE_NAME = "test";
 	private static final String TEST_COOKIE_VALUE = "true";
-	private static final String LISTENER_LOG = "";
+	private static final String LISTENER_LOG = "onLocationChanged;onTitleChanged;";
 
 	private final AuthenticationListener authenticationListener = this::onAuthenticate;
 	private final CloseWindowListener closeWindowListener = this::onWindowClose;
@@ -131,7 +131,6 @@ class BrowserTestApplication implements MainFunction {
 
 	private void onWindowClose(WindowEvent event) {
 		this.listenerLogBuffer.append("onWindowClose;");
-		removeBrowserListeners();
 	}
 
 	private void onWindowOpen(WindowEvent event) {
@@ -147,9 +146,9 @@ class BrowserTestApplication implements MainFunction {
 	}
 
 	private void onProgressChanged(ProgressEvent event) {
-		this.listenerLogBuffer.append("onProgressChanged;");
 		if (event.current >= event.total) {
 			this.shellHolder.get().setText(TITLE_COMPLETED);
+			removeBrowserListeners();
 		}
 	}
 
